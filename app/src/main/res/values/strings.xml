@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Калькулятор</string>
+    <string name="action_graph">График платежей</string>
+    <string name="action_plot">Диаграмма платежей</string>
+
+    <string name="size_debt_title">Сумма кредита</string>
+    <string name="percent_size_title">Ставка кредита</string>
+    <string name="long_in_month">Срок кредита, мес.</string>
+
+    <string name="monthlypay_title">Всего:%1$s</string>
+    <string name="monthlydebt_title">Долг:%1$s</string>
+    <string name="monthlypercent_title">Проц.:%1$s</string>
+
+</resources>
