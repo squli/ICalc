@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements ViewPresenterCont
      * TODO двигающийся ползунок по графику
      * TODO примерная стоимость страховки + к расчетам
      */
-          
+
     /// Презентер этой вьюхи
     private ViewPresenterContract.PresenterInterface presenter;
 
