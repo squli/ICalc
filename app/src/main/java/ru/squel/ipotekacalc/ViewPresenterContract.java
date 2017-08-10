@@ -2,6 +2,7 @@ package ru.squel.ipotekacalc;
 
 import java.util.ArrayList;
 
+import ru.squel.ipotekacalc.data.DataModel;
 import ru.squel.ipotekacalc.data.MonthlyData;
 
 /**
@@ -11,14 +12,17 @@ public interface ViewPresenterContract {
 
     interface ViewInterface {
 
-        void displayNewGraph();
-
+        void saveToPreferences(DataModel dm);
     }
 
     interface PresenterInterface {
 
-        void updateData(double debtSize, double percent, int period);
         ArrayList<MonthlyData> getMonthlyData();
+
+        void saveButtonHandler(DataModel dm);
+        void calcButtonHandler(DataModel dm);
+
+        void displaySavedData(DataModel dm);
 
     }
 }

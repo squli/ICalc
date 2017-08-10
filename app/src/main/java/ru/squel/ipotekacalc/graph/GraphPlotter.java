@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import ru.squel.ipotekacalc.data.MonthlyData;
  * Created by sq on 01.08.2017.
  * Для отображения графика внутри фрагмента
  */
-public class GraphPlotter extends View {
+public class GraphPlotter extends View implements View.OnTouchListener {
 
     public static final String LOG_TAG = GraphPlotter.class.getSimpleName();
 
@@ -34,6 +35,9 @@ public class GraphPlotter extends View {
     private Canvas bitmapCanvas; // Используется для рисования на Bitmap
     private final Paint paintScreen; // Используется для вывода Bitmap на экран
     private final Paint paintLine; // Используется для рисования линий на Bitmap
+
+    /// для рисования линий при касании
+    private Path mPath = new Path();
 
     /// здесь три кривые - всего, за проценты, за долг
     private final Map<String, Path> pathMap = new HashMap<>();
@@ -54,10 +58,12 @@ public class GraphPlotter extends View {
         paintLine.setStyle(Paint.Style.STROKE); // сплошная линия
         paintLine.setStrokeWidth(5);            // толщина линиии по умолчанию
         paintLine.setStrokeCap(Paint.Cap.ROUND); // Закругленные концы
+        setOnTouchListener(this);
     }
 
     /**
      * Усиновка данных для графика
+     *
      * @param data
      */
     public void setData(ArrayList<MonthlyData> data) {
@@ -91,7 +97,8 @@ public class GraphPlotter extends View {
         // Для каждой выводимой линии
         Path path = new Path();
         // отображение рамки
-        RectF rectf = new RectF(0,0,sizeX,sizeY);
+        int baseSize = Math.min(sizeX, sizeY);
+        RectF rectf = new RectF(0, 0, baseSize, baseSize);
         path.addRect(rectf, Path.Direction.CW);
         paintLine.setColor(Color.BLACK);
         canvas.drawPath(path, paintLine);
@@ -113,6 +120,11 @@ public class GraphPlotter extends View {
         for (Point p : debtDots) {
             canvas.drawPoint(p.x, p.y, paintLine);
         }
+
+        if (mPath != null) {
+            paintLine.setColor(Color.BLACK);
+            canvas.drawPath(mPath, paintLine);
+        }
     }
 
     /**
@@ -120,7 +132,7 @@ public class GraphPlotter extends View {
      */
     private void calculateDots() {
         int baseSize = Math.min(sizeX, sizeY);
-        double x_step = (double)(baseSize) / MonthlyData.getTotalMonthes();
+        double x_step = (double) (baseSize) / MonthlyData.getTotalMonthes();
 
         Integer i = 0;
 
@@ -129,15 +141,15 @@ public class GraphPlotter extends View {
             double debtDot_y = dot.getDoubleMonthlyDebt();
             double percentDot_y = dot.getDoubleMonthlyPercent();
 
-            double maxY = (int)(1.2 * payDot_y);
+            double maxY = (int) (1.2 * payDot_y);
 
             int y_pay = (int) (baseSize * payDot_y / maxY);
             int y_debt = (int) (baseSize * debtDot_y / maxY);
             int y_perc = (int) (baseSize * percentDot_y / maxY);
 
-            percentDots.add(new Point((int)Math.round(x_step*i), baseSize - y_perc));
-            debtDots.add(new Point((int)Math.round(x_step*i), baseSize - y_debt));
-            payDots.add(new Point((int)Math.round(x_step*i), baseSize - y_pay));
+            percentDots.add(new Point((int) Math.round(x_step * i), baseSize - y_perc));
+            debtDots.add(new Point((int) Math.round(x_step * i), baseSize - y_debt));
+            payDots.add(new Point((int) Math.round(x_step * i), baseSize - y_pay));
             i += 1;
         }
     }
@@ -206,4 +218,28 @@ public class GraphPlotter extends View {
     }
 
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        float x;
+        float y;
+
+        x = event.getX();
+        y = event.getY();
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN: // нажатие
+                int baseSize = Math.min(sizeX, sizeY);
+                mPath.reset();
+                mPath.moveTo(x, 0);
+                mPath.lineTo(x, baseSize);
+                invalidate();
+                break;
+            case MotionEvent.ACTION_MOVE: // движение
+                break;
+            case MotionEvent.ACTION_UP: // отпускание
+            case MotionEvent.ACTION_CANCEL:
+                break;
+        }
+        return true;
+    }
 }

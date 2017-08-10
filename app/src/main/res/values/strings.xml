@@ -11,4 +11,11 @@
     <string name="monthlydebt_title">Долг:%1$s</string>
     <string name="monthlypercent_title">Проц.:%1$s</string>
 
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="date_begin_title">Дата начала</string>
+    <string name="ensurance_title">Учесть страховку</string>
+    <string name="save_button_title">Сохранить</string>
+    <string name="calc_button_title">Рассчитать</string>
+    <string name="action_config">Параметры</string>
+
 </resources>

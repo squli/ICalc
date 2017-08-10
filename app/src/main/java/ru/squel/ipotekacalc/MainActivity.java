@@ -1,18 +1,18 @@
 package ru.squel.ipotekacalc;
 
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 
 import java.util.ArrayList;
 
+import layout.ConfigFragment;
+import ru.squel.ipotekacalc.data.DataModel;
 import ru.squel.ipotekacalc.data.MonthlyData;
 import ru.squel.ipotekacalc.graph.GraphFragment;
 import ru.squel.ipotekacalc.list.ItemFragment;
@@ -29,6 +29,18 @@ public class MainActivity extends AppCompatActivity implements ViewPresenterCont
     /// Презентер этой вьюхи
     private ViewPresenterContract.PresenterInterface presenter;
 
+    /// это будет именем файла настроек
+    public static final String APP_PREFERENCES = "myCalcPreferences";
+    /// названия параметров для сохранения настроек
+    public static final String APP_PREFERENCES_VALIDFLAG = "pref_valid_flag";
+    public static final String APP_PREFERENCES_TOTAL_DEBT = "pref_total_debt";
+    public static final String APP_PREFERENCES_PERCENT = "pref_percent";
+    public static final String APP_PREFERENCES_LONG = "pref_long";
+    public static final String APP_PREFERENCES_DATEBEGIN = "pref_begin_date";
+    public static final String APP_PREFERENCES_ENSURANCE = "pref_ensurance";
+    /// настройки для приложения
+    SharedPreferences mySharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,30 +53,15 @@ public class MainActivity extends AppCompatActivity implements ViewPresenterCont
             presenter = new MainActivityPresenter(this);
         }
 
-        final EditText textViewDebtSize = (EditText) findViewById(R.id.TotalDebtSizeEditText);
-        final EditText textViewPercent = (EditText) findViewById(R.id.percentEditText);
-        final EditText textViewPeriod = (EditText) findViewById(R.id.longEditText);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Update", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                double cDebt = 0;
-                double cPercent = 0;
-                int cPeriod = 0;
-
-                try {
-                    cDebt = Double.parseDouble(textViewDebtSize.getText().toString());
-                    cPercent = Double.parseDouble(textViewPercent.getText().toString());
-                    cPeriod = Integer.parseInt(textViewPeriod.getText().toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                presenter.updateData(cDebt, cPercent, cPeriod);
-            }
-        });
+        mySharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        /// если настроек не было, то показать фрагмент с настройками в основном окне
+        /// если были, то отобразить фрагмент с приветствием
+        if(mySharedPreferences.contains(APP_PREFERENCES_VALIDFLAG) && mySharedPreferences.getBoolean(APP_PREFERENCES_VALIDFLAG, false) == true) {
+                presenter.displaySavedData(loadDataFromSharedPreferences());
+        }
+        else {
+            showConfFragment(null);
+        }
     }
 
     @Override
@@ -82,34 +79,57 @@ public class MainActivity extends AppCompatActivity implements ViewPresenterCont
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        if (id == R.id.action_config) {
+            // если есть сохраненные значения, то отобразить их, если нет то показать пустые
+            showConfFragment(loadDataFromSharedPreferences());
+            return true;
+        }
         if (id == R.id.action_plot) {
             showGraphFragment(presenter.getMonthlyData());
-            //displayNewGraph();
             return true;
         }
         if (id == R.id.action_graph) {
             showListFragment(presenter.getMonthlyData());
-            //displayNewDebtList();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Отобразить новый график
-     */
     @Override
-    public void displayNewGraph() {
+    public void saveToPreferences(DataModel dm) {
+
+        SharedPreferences.Editor e = mySharedPreferences.edit();
+
+        e.putBoolean(APP_PREFERENCES_VALIDFLAG, true);
+        e.putLong(APP_PREFERENCES_TOTAL_DEBT, dm.getSummDebt());
+        e.putFloat(APP_PREFERENCES_PERCENT, dm.getPercentDebt());
+        e.putInt(APP_PREFERENCES_LONG, dm.getPeriodDebt());
+
+        e.commit(); // не забудьте подтвердить изменения
 
     }
 
-
     /**
-     * Отобразить фрагмент со списком графика платежей
+     * Отображение фрагмента с настройками
      */
-    public void displayNewDebtList() {
-
+    public void showConfFragment(DataModel dataModel) {
+        // настроек не было и будет отображаться фрагмент настроек:
+        ConfigFragment configFragment = new ConfigFragment();
+        configFragment.setMainActivityPresenter(presenter);
+        if (dataModel != null) {
+            configFragment.setDisplayedData(dataModel);
+        }
+        // новая транзакция
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        // замена фрейма на созданный фрагмент
+        transaction.replace(R.id.fragment_container, configFragment);
+        // запуск транзакции без названия
+        transaction.addToBackStack(null);
+        // настройка анимации
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        // отправка фрагмента на исполнение
+        transaction.commit();
     }
 
     /**
@@ -149,6 +169,22 @@ public class MainActivity extends AppCompatActivity implements ViewPresenterCont
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         // отправка фрагмента на исполнение
         transaction.commit();
+    }
+
+
+    private DataModel loadDataFromSharedPreferences() {
+        DataModel dm = new DataModel();
+        // значит были сохранены настройки и будет отображаться окно приветствия
+        if(mySharedPreferences.contains(APP_PREFERENCES_TOTAL_DEBT) &&
+                mySharedPreferences.contains(APP_PREFERENCES_TOTAL_DEBT) &&
+                mySharedPreferences.contains(APP_PREFERENCES_LONG)) {
+            long debtSize = mySharedPreferences.getLong(APP_PREFERENCES_TOTAL_DEBT, 0);
+            float percentSize = mySharedPreferences.getFloat(APP_PREFERENCES_PERCENT, 0);
+            int periodSize = mySharedPreferences.getInt(APP_PREFERENCES_LONG, 0);
+
+            dm.setDataModel(debtSize, percentSize, periodSize);
+        }
+        return  dm;
     }
 
 }

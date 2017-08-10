@@ -23,19 +23,34 @@ public class MainActivityPresenter implements ViewPresenterContract.PresenterInt
     /**
      * Обновление данных,
       */
-    @Override
-    public void updateData(double debtSize, double percent, int period) {
 
-        dataModel.setDataModel(debtSize, percent, period);
+    private void updateData() {
         dataModel.recalculateAll();
-
-        // обновить график на фрагменте
-        //dataModel.getGraphData();
-        view.displayNewGraph();
     }
 
     @Override
     public ArrayList<MonthlyData> getMonthlyData() {
         return dataModel.getListData();
+    }
+
+    @Override
+    public void saveButtonHandler(DataModel newData) {
+        this.dataModel = newData;
+        view.saveToPreferences(dataModel);
+
+        updateData();
+    }
+
+    @Override
+    public void calcButtonHandler(DataModel newData) {
+        this.dataModel = newData;
+
+        updateData();
+    }
+
+    public void displaySavedData(DataModel dm) {
+        this.dataModel = dm;
+
+        updateData();
     }
 }
