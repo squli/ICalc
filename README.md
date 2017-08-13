@@ -5,7 +5,7 @@
 ![Список платежей](https://github.com/squli/ICalc/blob/master/app/src/main/java/screen1.png)
 
 Список платежей:
-![Список платежей](https://github.com/squli/ICalc/blob/master/screen3.png)
+![Список платежей](https://github.com/squli/ICalc/blob/master/app/src/main/java/screen3.png)
 
 График:
-![Список платежей](https://github.com/squli/ICalc/blob/master/screen2.png)
+![Список платежей](https://github.com/squli/ICalc/blob/master/app/src/main/java/screen2.png)
