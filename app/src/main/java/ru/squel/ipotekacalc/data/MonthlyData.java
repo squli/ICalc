@@ -8,25 +8,28 @@ public class MonthlyData {
 
     private double monthlyPay;
 
+    /// сумма приведенной страховки
+    private double monthlyEnsurance = 0;
+
     /// доля месячного платежа - на проценты
-    private double monthlyPercent;
+    private double monthlyPercent = 0;
     /// доля месячного платежа - на кредит
-    private double monthlyDebt;
+    private double monthlyDebt = 0;
 
     /// остаток долга на текущий месяц
-    private double currentDebtSize;
+    private double currentDebtSize = 0;
     /// сумма переплаты на текущий месяц
-    private double currentPercentSize;
+    private double currentPercentSize = 0;
 
     /// общая сумма кредита
-    private static double totalDebtSize;
+    private static double totalDebtSize = 0;
     /// общая сумма переплаты - одна у всех
-    private static double totalPercentSize;
+    private static double totalPercentSize = 0;
     /// количество месяцев
-    private static int totalMonthes;
+    private static int totalMonthes = 0;
 
     public MonthlyData(double monthPay, double percentPay, double debtPay,
-                       double currentDebtSize, double currentPercentSize) {
+                       double currentDebtSize, double currentPercentSize, double monthlyEnsurance) {
 
         this.monthlyPay = monthPay;
         this.monthlyPercent = percentPay;
@@ -34,6 +37,7 @@ public class MonthlyData {
 
         this.currentDebtSize = currentDebtSize;
         this.currentPercentSize = currentPercentSize;
+        this.monthlyEnsurance = monthlyEnsurance;
     }
 
     /**
@@ -76,6 +80,10 @@ public class MonthlyData {
 
     public String getTotalDebtSize() {
         return String.format("%.0f", totalDebtSize);
+    }
+
+    public String getEnsurance() {
+        return String.format("%.0f", monthlyEnsurance);
     }
 
 }

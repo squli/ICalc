@@ -17,5 +17,11 @@
     <string name="save_button_title">Сохранить</string>
     <string name="calc_button_title">Рассчитать</string>
     <string name="action_config">Параметры</string>
+    <string name="graph_desc_summ_title">Сумма платежа</string>
+    <string name="graph_desc_by_parts_title">Включая:</string>
+    <string name="graph_desc_debt_title">В тело долга</string>
+    <string name="graph_desc_percent_title">По процентам</string>
+    <string name="graph_desc_month_title">Месяц</string>
+    <string name="graph_desc_ensurance_title">Страховка</string>
 
 </resources>

@@ -13,10 +13,9 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import ru.squel.ipotekacalc.data.MonthlyData;
 
@@ -27,6 +26,8 @@ import ru.squel.ipotekacalc.data.MonthlyData;
 public class GraphPlotter extends View implements View.OnTouchListener {
 
     public static final String LOG_TAG = GraphPlotter.class.getSimpleName();
+
+    private OnPlotClickCallback callback;
 
     /// данные для построителя графика
     private ArrayList<MonthlyData> data;
@@ -39,8 +40,6 @@ public class GraphPlotter extends View implements View.OnTouchListener {
     /// для рисования линий при касании
     private Path mPath = new Path();
 
-    /// здесь три кривые - всего, за проценты, за долг
-    private final Map<String, Path> pathMap = new HashMap<>();
     /// здесь точки
     private final ArrayList<Point> percentDots = new ArrayList<>();
     private final ArrayList<Point> debtDots = new ArrayList<>();
@@ -61,6 +60,10 @@ public class GraphPlotter extends View implements View.OnTouchListener {
         setOnTouchListener(this);
     }
 
+    public void setOnPlotClickCallback(OnPlotClickCallback callback) {
+        this.callback = callback;
+    }
+
     /**
      * Усиновка данных для графика
      *
@@ -74,8 +77,13 @@ public class GraphPlotter extends View implements View.OnTouchListener {
     @Override
     public void onSizeChanged(int w, int h, int oldW, int oldH) {
 
-        this.sizeX = getWidth();
-        this.sizeY = getHeight();
+        sizeX = getWidth();
+        sizeY = getHeight();
+        int baseSize = Math.min(sizeX, sizeY);
+
+        if (sizeY > baseSize)
+            setLayoutParams(new LinearLayout.LayoutParams(sizeX, baseSize));
+
         bitmap = Bitmap.createBitmap(getWidth(), getHeight(),
                 Bitmap.Config.ARGB_8888);
         bitmapCanvas = new Canvas(bitmap);
@@ -232,6 +240,12 @@ public class GraphPlotter extends View implements View.OnTouchListener {
                 mPath.reset();
                 mPath.moveTo(x, 0);
                 mPath.lineTo(x, baseSize);
+
+                float step = sizeX/data.size();
+                int idx = Math.round(x/(step));
+                if (idx < data.size())
+                    callback.onPlotCallback(data.get(idx), idx);
+
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE: // движение

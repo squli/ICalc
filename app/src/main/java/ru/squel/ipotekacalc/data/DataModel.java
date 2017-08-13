@@ -82,7 +82,7 @@ public class DataModel {
                 ensurancePerYear = ostatokDebt * 0.01;
             }
 
-            MonthlyData monthlyData = new MonthlyData(monthPay + ensurancePerYear/12, percentPay, debtPay, ostatokDebt, percenFull);
+            MonthlyData monthlyData = new MonthlyData(monthPay, percentPay, debtPay, ostatokDebt, percenFull, ensurancePerYear/12);
             this.dataByMonth.add(monthlyData);
         }
 
